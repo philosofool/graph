@@ -144,9 +144,9 @@ def test_graph_add_edge_to_graphed_node():
 def test_get_node():
     graph = Graph()
     graph.add_node(Node(1))
-    assert graph.get_node(Node(1)) == Node(1)
+    assert graph.get_node(1) == Node(1)
     with np.testing.assert_raises(KeyError):
-        assert graph.get_node(Node(0))
+        assert graph.get_node(0)
 
 def test_in_graph():
     graph = Graph()

@@ -67,8 +67,8 @@ class Graph:
             if edge_node not in self:
                 self.add_node(edge_node)
 
-    def get_node(self, node):
-        return self.nodes[node.name]
+    def get_node(self, node_name: Any) -> Node:
+        return self.nodes[node_name]
 
     def remove_node(self, node: Node):
         """Remove node from graph and delete any edge from another node to that one."""
