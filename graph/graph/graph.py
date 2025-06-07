@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Hashable, Sequence, Iterator
+from typing import Any
 
 
 class Node:
+    """A node (vertex) in a graph."""
     def __init__(self, name: Hashable):
         self.name = name
         self.edges = set()
@@ -14,10 +16,12 @@ class Node:
     def remove_edge(self, edge: Edge):
         self.edges.remove(edge)
 
-    def adjacent_nodes(self):
+    def adjacent_nodes(self) -> set[Node]:
+        """List nodes reachable, 1 step away from, this node."""
         return {edge.node for edge in self.edges}
 
-    def edges_to_node(self, node: Node):
+    def edges_to_node(self, node: Node) -> set[Edge]:
+        """Get a set of edges in node which connect to this one directly."""
         return {edge for edge in self.edges if edge.node == node}
 
     def _disconnect(self, node: Node):
@@ -35,6 +39,7 @@ class Node:
 
 
 class Edge:
+    """A directed path to a node."""
     def __init__(self, node: Node, label: Hashable):
         self._node = node
         self._label = label
@@ -57,10 +62,18 @@ class Edge:
 
 
 class Graph:
+    """A collection of nodes and edges, with behaviors to traverse them."""
     def __init__(self):
         self.nodes: dict[Hashable, Node] = {}
 
     def add_node(self, node: Node):
+        """A node to a graph.
+
+        All edge nodes to node are also added. When adding edges to a node that's
+        already in the graph, this method will add those edge nodes.
+        This is a relatively expensive, and it is preferable to add the edge node
+        as a separate call.
+        """
         if node.name in self.nodes and self.nodes[node.name] != node:
             raise ValueError(f"Attempt to add {node} to graph, but it is not equivalent to {self.nodes[node.name]}")
         self.nodes[node.name] = node
@@ -69,10 +82,22 @@ class Graph:
                 self.add_node(edge_node)
 
     def get_node(self, node_name: Any) -> Node:
+        """Return the node with node name.
+
+        Raise KeyError if node is not in the graph.
+        """
         return self.nodes[node_name]
 
     def remove_node(self, node: Node):
-        """Remove node from graph and delete any edge from another node to that one."""
+        """Remove node from graph and delete any edge from another node to that one.
+
+        Note that all edges to the removed node are also removed.
+        The removed node will have no edges and may safely be added to a different
+        graph without connecting that graph to this one, if any reference to it
+        exits.
+        For this reason, it is important not to use a node that could be removed
+        as an entrypoint into a graph.
+        """
         for other_node in self.nodes.values():
             node._disconnect(other_node)  # TODO: this is not the most performant implementation.
             other_node._disconnect(node)
@@ -106,7 +131,6 @@ class Graph:
                 seen.add(node)
                 yield node
                 nodes_to_traverse.remove(node)
-
 
     @classmethod
     def from_dict(cls, nodes: dict[Hashable, Sequence]):
