@@ -70,9 +70,27 @@ class Graph:
         self.nodes.pop(node.name)
 
     def depth_first_search(self, node: Node | None):
+        """Execute a depth first search of the graph.
+
+        If node is provided, the search begins with node and arrives at the subgraph
+        reachable from that node.
+
+        If node is None, the search will traverse all nodes in the graph.
+        """
+
         if node is None:
             arbitrary_node = next(iter(self.nodes.values()))
             return self.depth_first_search(arbitrary_node)
+        stack = [node]
+        seen = set()
+        while stack:
+            cur_node = stack.pop()
+            seen.add(cur_node)
+            for adj_node in cur_node.adjacent_nodes():
+                if adj_node in seen:
+                    continue
+                stack.append(adj_node)
+            yield cur_node
 
     @classmethod
     def from_dict(cls, nodes: dict[Hashable, Sequence]):

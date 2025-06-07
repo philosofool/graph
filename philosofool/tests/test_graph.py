@@ -1,7 +1,7 @@
 import pytest
 
 import numpy as np
-from philosofool.graph import Node, Edge, Graph
+from philosofool.graph.graph import Node, Edge, Graph
 
 def test_node_attributes():
     node = Node('a')
@@ -196,5 +196,15 @@ def test_from_dict_edges(nodes):
     assert not node2.edges
 
 
-def test_depth_first_search():
-    raise Exception("This test has not been written.")
+def test_depth_first_search(graph, nodes):
+    node1, node2, node3, node4 = nodes
+
+    nodes = []
+    for node in graph.depth_first_search(node1):
+        nodes.append(node)
+    assert nodes.index(node1) == 0, "Node 1 should be the first one reached."
+    assert nodes.index(node3) < nodes.index(node4), "node three will be reached before it's edge-node (node4)"
+    if nodes.index(node3) > nodes.index(node2):
+        assert nodes[1] == node2, "Node 2 must be second if it's before node 3."
+    else:
+        assert nodes[3] == node2, "Node 2 must be last it it's after node 3."
