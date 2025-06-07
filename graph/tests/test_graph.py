@@ -1,7 +1,7 @@
 import pytest
 
 import numpy as np
-from philosofool.graph.graph import Node, Edge, Graph
+from graph.graph import Node, Edge, Graph
 
 def test_node_attributes():
     node = Node('a')
