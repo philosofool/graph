@@ -35,8 +35,8 @@ class Node:
 
 class Edge:
     def __init__(self, node: Node, label):
-        self.node = node
-        self.label = label
+        self._node = node
+        self._label = label
 
     def __hash__(self):
         return hash((self.node, self.label))
@@ -45,6 +45,14 @@ class Edge:
         if not isinstance(other, Edge):
             return False
         return self.node == other.node and self.label == other.label
+
+    @property
+    def label(self):
+        return self._label
+
+    @property
+    def node(self):
+        return self._node
 
 
 class Graph:

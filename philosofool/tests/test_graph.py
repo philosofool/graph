@@ -86,6 +86,13 @@ def test_edge_equality():
     assert edge != Edge(Node('other_node'), 'label')
     assert edge != Edge(Node('other node'), 'different label')
 
+def test_edge_properties_immutable():
+    edge = Edge(Node(1), '1')
+    with np.testing.assert_raises(AttributeError):
+        edge.label = '2'
+    with np.testing.assert_raises(AttributeError):
+        edge.node = Node(1)
+
 def test_graph():
     graph = Graph()
     assert graph.nodes == {}
