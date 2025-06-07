@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Hashable, Sequence
+from collections.abc import Hashable, Sequence, Iterator
 
 
 class Node:
@@ -69,18 +69,8 @@ class Graph:
             other_node.disconnect(node)
         self.nodes.pop(node.name)
 
-    def depth_first_search(self, node: Node | None):
-        """Execute a depth first search of the graph.
-
-        If node is provided, the search begins with node and arrives at the subgraph
-        reachable from that node.
-
-        If node is None, the search will traverse all nodes in the graph.
-        """
-
-        if node is None:
-            arbitrary_node = next(iter(self.nodes.values()))
-            return self.depth_first_search(arbitrary_node)
+    def depth_first_from(self, node: Node):
+        """Return all nodes reachable from node, in DFS order."""
         stack = [node]
         seen = set()
         while stack:
@@ -91,6 +81,23 @@ class Graph:
                     continue
                 stack.append(adj_node)
             yield cur_node
+
+    def depth_first_search(self) -> Iterator[Node]:
+        """Yield nodes in depth-first search order.
+
+        If the graph is disconnected, subgraphs are returned in arbitrary order.
+        """
+        nodes_to_traverse = set(self.nodes.values())
+        seen = set()
+        while nodes_to_traverse:
+            arbitrary_node = next(iter(nodes_to_traverse))
+            for node in self.depth_first_from(arbitrary_node):
+                if node in seen:
+                    continue
+                seen.add(node)
+                yield node
+                nodes_to_traverse.remove(node)
+
 
     @classmethod
     def from_dict(cls, nodes: dict[Hashable, Sequence]):

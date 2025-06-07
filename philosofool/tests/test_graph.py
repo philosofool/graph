@@ -196,11 +196,18 @@ def test_from_dict_edges(nodes):
     assert not node2.edges
 
 
-def test_depth_first_search(graph, nodes):
+@pytest.mark.parametrize('arg', [None])
+def test_depth_first_from_requires_node(arg, graph):
+    with np.testing.assert_raises(Exception, msg=f"Graph must not take {arg} as an input."):
+        for e in graph.depth_first_from(arg):
+            print(e)
+
+
+def test_depth_first_from_1(graph, nodes):
     node1, node2, node3, node4 = nodes
 
     nodes = []
-    for node in graph.depth_first_search(node1):
+    for node in graph.depth_first_from(node1):
         nodes.append(node)
     assert nodes.index(node1) == 0, "Node 1 should be the first one reached."
     assert nodes.index(node3) < nodes.index(node4), "node three will be reached before it's edge-node (node4)"
@@ -208,3 +215,43 @@ def test_depth_first_search(graph, nodes):
         assert nodes[1] == node2, "Node 2 must be second if it's before node 3."
     else:
         assert nodes[3] == node2, "Node 2 must be last it it's after node 3."
+
+
+
+def test_depth_first_from_3(graph, nodes):
+    node1, node2, node3, node4 = nodes
+
+    nodes = list(graph.depth_first_from(node3))
+    assert nodes[0] == node3
+    assert nodes[1] == node4
+    assert len(nodes) == 2
+
+def test_depth_first_from_with_multiple_passes_through_nodes(graph, nodes):
+    node1, node2, node3, node4 = nodes
+    node4.add_edge(Edge(node1, '1'))
+    assert len(list(graph.depth_first_from(node1))) == 4, "We reach one from 4 starting at one, but we should not yield 1 more than once."
+    assert len(list(graph.depth_first_from(node4))) == 4, "Same result, starting from 4: we should not yield 4 twice."
+
+    node3.add_edge(Edge(node3, 'self'))
+    assert len(list(graph.depth_first_from(node3))) == 4, "A node that passes through itself should only be yielded once when traversing from that node."
+    assert len(list(graph.depth_first_from(node1))) == 4, \
+        "A node that passes through itself should only be yielded once when starting from an node that passes through it."
+
+def test_depth_first_search(graph, nodes):
+    node1, node2, node3, node4 = nodes
+    node5 = Node(5)
+    node6 = Node(6)
+    node5.add_edge(Edge(node6, '6'))
+    graph.add_node(node5)
+
+    result = list(graph.depth_first_search())
+    assert len(result) == 6, "This should return 6 nodes."
+    for node in nodes:
+        assert node in result, "Expected each node original graph in result"
+    assert node5 in result
+    assert node6 in result, "There should be one more node, (Node(6))"
+
+    node5.add_edge(Edge(node1, '1'))
+    graph.add_node(node5)
+
+    result = list(graph.depth_first_search())
