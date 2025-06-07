@@ -53,6 +53,12 @@ def test_adjacent_nodes():
     node.add_edge(Edge(node, None))
     assert node.adjacent_nodes() == {Node(1), node}
 
+def test_self_adjacent_node(nodes):
+    node1 = nodes[0]
+    assert node1 not in node1.adjacent_nodes()
+    node1.add_edge(Edge(node1, 'self'))
+    assert node1 in node1.adjacent_nodes()
+
 def test_disconnect():
     """Remove all edges leading to node."""
     node1 = Node(1)
@@ -86,6 +92,14 @@ def test_edge_equality():
     assert edge != Edge(Node('other_node'), 'label')
     assert edge != Edge(Node('other node'), 'different label')
 
+def test_edge_equality_similar_edge():
+    node = Node('node')
+    edge = Edge(node, 'label')
+    other_node = Node('node')
+    assert edge == Edge(other_node, 'label'), "Since other_node == node, this is the same edge."
+    other_node.add_edge(Edge(other_node, 'self'))
+    assert edge != Edge(other_node, 'label'), "If other node changes, these are not the same edge anymore."
+
 def test_edge_properties_immutable():
     edge = Edge(Node(1), '1')
     with np.testing.assert_raises(AttributeError):
@@ -113,7 +127,7 @@ def test_add_node():
 
     similar_node = Node(1)
     similar_node.add_edge(Edge(similar_node, 'self'))
-    with np.testing.assert_raises(ValueError, msg='Adding a node with the same label that is not equivalent should be prohibited.'):
+    with np.testing.assert_raises(ValueError, msg='Adding a node with the same name that is not equivalent should be prohibited.'):
         graph.add_node(similar_node)
 
 def test_graph_add_edge_to_graphed_node():
@@ -161,6 +175,7 @@ def test_remove_node():
     assert node2 not in node1.adjacent_nodes()
     assert node1 not in graph
 
+
 @pytest.fixture
 def graph() -> Graph:
     graph = Graph.from_dict({
@@ -170,7 +185,7 @@ def graph() -> Graph:
     return graph
 
 @pytest.fixture
-def nodes(graph):
+def nodes(graph) -> list[Node]:
     return [graph.nodes[i] for i in range(1, 5)]
 
 def test_from_dict_creates_nodes(graph):
@@ -222,8 +237,6 @@ def test_depth_first_from_1(graph, nodes):
         assert nodes[1] == node2, "Node 2 must be second if it's before node 3."
     else:
         assert nodes[3] == node2, "Node 2 must be last it it's after node 3."
-
-
 
 def test_depth_first_from_3(graph, nodes):
     node1, node2, node3, node4 = nodes
