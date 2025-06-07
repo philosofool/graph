@@ -20,7 +20,8 @@ class Node:
     def edges_to_node(self, node: Node):
         return {edge for edge in self.edges if edge.node == node}
 
-    def disconnect(self, node: Node):
+    def _disconnect(self, node: Node):
+        # I'm a little skeptical.
         for edge in self.edges_to_node(node):
             self.remove_edge(edge)
 
@@ -28,13 +29,13 @@ class Node:
         return hash(self.name)
 
     def __eq__(self, other):
-        if not isinstance(other, Node):
+        if not isinstance(other, self.__class__):
             return False
         return (self.name == other.name) and (self.edges == other.edges)
 
 
 class Edge:
-    def __init__(self, node: Node, label):
+    def __init__(self, node: Node, label: Hashable):
         self._node = node
         self._label = label
 
@@ -73,11 +74,11 @@ class Graph:
     def remove_node(self, node: Node):
         """Remove node from graph and delete any edge from another node to that one."""
         for other_node in self.nodes.values():
-            node.disconnect(other_node)
-            other_node.disconnect(node)
+            node._disconnect(other_node)  # TODO: this is not the most performant implementation.
+            other_node._disconnect(node)
         self.nodes.pop(node.name)
 
-    def depth_first_from(self, node: Node):
+    def depth_first_from(self, node: Node) -> Iterator[Node]:
         """Return all nodes reachable from node, in DFS order."""
         stack = [node]
         seen = set()

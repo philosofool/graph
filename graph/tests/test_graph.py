@@ -10,8 +10,22 @@ def test_node_attributes():
     assert isinstance(node.edges, set)
 
 def test_node_equality():
-    assert Node('a') == Node('a')
+    nodeA = Node('a')
+    assert nodeA == Node('a')
     assert Node('a') != Node('b')
+    assert nodeA is not Node('a'), "It is possible to have two nodes with the same label in different graphs."
+    assert nodeA.add_edge(Edge(Node(1), '1')) != Node('a'), "Same label, different edges is a different node."
+
+def test_node_equality_child_class():
+    class ChildNode(Node):
+        pass
+
+    node = Node(1)
+    child_node = ChildNode(1)
+    assert isinstance(child_node, Node)
+    assert node.name == child_node.name and node.edges == child_node.edges
+    assert node != child_node
+    assert child_node != node
 
 def test_node_add_to_set():
     a_set = set()
@@ -59,15 +73,14 @@ def test_self_adjacent_node(nodes):
     node1.add_edge(Edge(node1, 'self'))
     assert node1 in node1.adjacent_nodes()
 
-def test_disconnect():
-    """Remove all edges leading to node."""
+def test__disconnect():
     node1 = Node(1)
     node2 = Node(2)
     first_edge = Edge(node2, 'first')
     second_edge = Edge(node2, 'second')
     node1.add_edge(first_edge)
     node1.add_edge(second_edge)
-    node1.disconnect(node2)
+    node1._disconnect(node2)
     assert node2 not in node1.adjacent_nodes()
 
 def test_edges_to_node():
