@@ -72,6 +72,7 @@ def test_remove_node():
     assert node1 not in graph
 
 
+
 @pytest.fixture
 def graph() -> Graph:
     graph = Graph.from_dict({
@@ -83,6 +84,12 @@ def graph() -> Graph:
 @pytest.fixture
 def nodes(graph: Graph) -> list[Node]:
     return [graph.nodes[i] for i in range(1, 5)]
+
+def test__disconnect(nodes, graph):
+    node1, node2, node3, node4 = nodes
+    graph._disconnect(node1, node2)
+    assert node2 not in node1.adjacent_nodes()
+
 
 def test_from_dict_creates_nodes(graph: Graph):
     assert isinstance(graph, Graph)

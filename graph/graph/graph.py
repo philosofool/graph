@@ -24,11 +24,6 @@ class Node:
         """Get a set of edges in node which connect to this one directly."""
         return {edge for edge in self.edges if edge.node == node}
 
-    def _disconnect(self, node: Node):
-        # I'm a little skeptical.
-        for edge in self.edges_to_node(node):
-            self.remove_edge(edge)
-
     def __hash__(self):
         return hash(self.name)
 
@@ -99,9 +94,15 @@ class Graph:
         as an entrypoint into a graph.
         """
         for other_node in self.nodes.values():
-            node._disconnect(other_node)  # TODO: this is not the most performant implementation.
-            other_node._disconnect(node)
+            self._disconnect(node, other_node)  # TODO: this is not the most performant implementation.
+            self._disconnect(other_node, node)
         self.nodes.pop(node.name)
+
+    def _disconnect(self, node, edge_node):
+        """Remove all edges from node to edge node."""
+        # I'm a little skeptical.
+        for edge in node.edges_to_node(edge_node):
+            node.remove_edge(edge)
 
     def depth_first_from(self, node: Node) -> Iterator[Node]:
         """Return all nodes reachable from node, in DFS order."""

@@ -71,18 +71,6 @@ def test_self_adjacent_node(nodes: list[Node]):
     node1.add_edge(Edge(node1, 'self'))
     assert node1 in node1.adjacent_nodes()
 
-
-def test__disconnect():
-    node1 = Node(1)
-    node2 = Node(2)
-    first_edge = Edge(node2, 'first')
-    second_edge = Edge(node2, 'second')
-    node1.add_edge(first_edge)
-    node1.add_edge(second_edge)
-    node1._disconnect(node2)
-    assert node2 not in node1.adjacent_nodes()
-
-
 def test_edges_to_node():
     node1 = Node(1)
     node2 = Node(2)
