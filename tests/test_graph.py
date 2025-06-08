@@ -1,7 +1,22 @@
 import pytest
+from graphlib import CycleError
 
 import numpy as np
 from graph.graph import Node, Edge, Graph
+
+
+@pytest.fixture
+def graph() -> Graph:
+    graph = Graph.from_dict({
+        1: [(2, '2'), (3, '3')],
+        3: [(4, '4')]
+    })
+    return graph
+
+@pytest.fixture
+def nodes(graph: Graph) -> list[Node]:
+    return [graph.nodes[i] for i in range(1, 5)]
+
 
 def test_graph():
     graph = Graph()
@@ -70,20 +85,6 @@ def test_remove_node():
     assert node1 not in node2.adjacent_nodes()
     assert node2 not in node1.adjacent_nodes()
     assert node1 not in graph
-
-
-
-@pytest.fixture
-def graph() -> Graph:
-    graph = Graph.from_dict({
-        1: [(2, '2'), (3, '3')],
-        3: [(4, '4')]
-    })
-    return graph
-
-@pytest.fixture
-def nodes(graph: Graph) -> list[Node]:
-    return [graph.nodes[i] for i in range(1, 5)]
 
 def test__disconnect(nodes, graph):
     node1, node2, node3, node4 = nodes
@@ -178,3 +179,28 @@ def test_depth_first_search(graph: Graph, nodes: list[Node]):
     graph.add_node(node5)
 
     result = list(graph.depth_first_search())
+
+def test_topological_sort(graph, nodes):
+    node1, node2, node3, node4 = nodes
+    result = list(graph.topological_sort())
+    possibility1 = [node4, node3, node2, node1]
+    possibility2 = [node2, node4, node3, node1]
+    assert result == possibility1 or result == possibility2
+
+def test_topplogical_sort_raises(graph):
+    node1 = graph.get_node(1)
+    node4 = graph.get_node(4)
+    node4.add_edge(Edge(node1, '1'))
+    with np.testing.assert_raises(CycleError):
+        list(graph.topological_sort())
+
+def test_topological_sort_with_islands(graph, nodes):
+    node1, node2, node3, node4 = nodes
+    node5 = Node(5)
+
+    graph.add_node(node5)
+    result = list(graph.topological_sort())
+    assert node5 in result
+    assert result.index(node1) > result.index(node2)
+    assert result.index(node1) > result.index(node3)
+    assert result.index(node3) > result.index(node4)

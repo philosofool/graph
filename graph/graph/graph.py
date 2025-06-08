@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Hashable, Sequence, Iterator
+from graphlib import CycleError
 from typing import Any
 
 
@@ -133,6 +134,17 @@ class Graph:
                 seen.add(node)
                 yield node
                 nodes_to_traverse.remove(node)
+
+    def topological_sort(self) -> Iterator[Node]:
+        queue = list(self.depth_first_search())
+        seen = set()
+        while queue:
+            node = queue.pop()
+            if node.adjacent_nodes().difference(seen):
+                raise CycleError
+            seen.add(node)
+            yield node
+
 
     @classmethod
     def from_dict(cls, nodes: dict[Hashable, Sequence]):
