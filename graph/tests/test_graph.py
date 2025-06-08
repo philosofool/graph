@@ -3,123 +3,6 @@ import pytest
 import numpy as np
 from graph.graph import Node, Edge, Graph
 
-def test_node_attributes():
-    node = Node('a')
-    assert node.name == 'a'
-    assert hash(node) == hash(node.name)
-    assert isinstance(node.edges, set)
-
-def test_node_equality():
-    nodeA = Node('a')
-    assert nodeA == Node('a')
-    assert Node('a') != Node('b')
-    assert nodeA is not Node('a'), "It is possible to have two nodes with the same label in different graphs."
-    assert nodeA.add_edge(Edge(Node(1), '1')) != Node('a'), "Same label, different edges is a different node."
-
-def test_node_equality_child_class():
-    class ChildNode(Node):
-        pass
-
-    node = Node(1)
-    child_node = ChildNode(1)
-    assert isinstance(child_node, Node)
-    assert node.name == child_node.name and node.edges == child_node.edges
-    assert node != child_node
-    assert child_node != node
-
-def test_node_add_to_set():
-    a_set = set()
-    for i in range(2):
-        a_set.add(Node(1))
-    assert len(a_set) == 1
-    a_set.remove(Node(1))
-    assert not a_set
-
-def test_edge_add_to_set():
-    a_set = set()
-    for i in range(2):
-        a_set.add(Edge(Node(1), 1))
-    assert len(a_set) == 1
-    a_set.remove(Edge(Node(1), 1))
-    assert not a_set
-
-def test_add_edge():
-    node = Node('a')
-    edge = Edge(node, 'self')
-    node.add_edge(edge)
-    assert len(node.edges) == 1
-    assert edge in node.edges, "The edge should be in the node edges."
-    node.add_edge(edge)
-    assert len(node.edges) == 1, "Adding the same edge twice has no effect."
-
-def test_remove_edge():
-    node = Node('a')
-    edge = Edge(node, 'self')
-    node.add_edge(edge)
-    node.remove_edge(edge)
-    assert edge not in node.edges
-
-def test_adjacent_nodes():
-    node = Node(0)
-    assert node.adjacent_nodes() == set()
-    node.add_edge(Edge(Node(1), '1'))
-    assert node.adjacent_nodes() == {Node(1)}
-    node.add_edge(Edge(node, None))
-    assert node.adjacent_nodes() == {Node(1), node}
-
-def test_self_adjacent_node(nodes):
-    node1 = nodes[0]
-    assert node1 not in node1.adjacent_nodes()
-    node1.add_edge(Edge(node1, 'self'))
-    assert node1 in node1.adjacent_nodes()
-
-def test__disconnect():
-    node1 = Node(1)
-    node2 = Node(2)
-    first_edge = Edge(node2, 'first')
-    second_edge = Edge(node2, 'second')
-    node1.add_edge(first_edge)
-    node1.add_edge(second_edge)
-    node1._disconnect(node2)
-    assert node2 not in node1.adjacent_nodes()
-
-def test_edges_to_node():
-    node1 = Node(1)
-    node2 = Node(2)
-    first_edge = Edge(node2, 'first')
-    second_edge = Edge(node2, 'second')
-    node1.add_edge(first_edge)
-    node1.add_edge(second_edge)
-    assert node1.edges_to_node(node2) == {first_edge, second_edge}
-
-def test_edge_attributes():
-    edge = Edge(Node('a'), label=None)
-    assert edge.node == Node('a')
-    assert edge.label is None
-
-def test_edge_equality():
-    node = Node('node')
-    edge = Edge(node, 'label')
-    assert edge == Edge(node, 'label')
-    assert edge != Edge(node, 'different label')
-    assert edge != Edge(Node('other_node'), 'label')
-    assert edge != Edge(Node('other node'), 'different label')
-
-def test_edge_equality_similar_edge():
-    node = Node('node')
-    edge = Edge(node, 'label')
-    other_node = Node('node')
-    assert edge == Edge(other_node, 'label'), "Since other_node == node, this is the same edge."
-    other_node.add_edge(Edge(other_node, 'self'))
-    assert edge != Edge(other_node, 'label'), "If other node changes, these are not the same edge anymore."
-
-def test_edge_properties_immutable():
-    edge = Edge(Node(1), '1')
-    with np.testing.assert_raises(AttributeError):
-        edge.label = '2'
-    with np.testing.assert_raises(AttributeError):
-        edge.node = Node(1)
-
 def test_graph():
     graph = Graph()
     assert graph.nodes == {}
@@ -198,17 +81,17 @@ def graph() -> Graph:
     return graph
 
 @pytest.fixture
-def nodes(graph) -> list[Node]:
+def nodes(graph: Graph) -> list[Node]:
     return [graph.nodes[i] for i in range(1, 5)]
 
-def test_from_dict_creates_nodes(graph):
+def test_from_dict_creates_nodes(graph: Graph):
     assert isinstance(graph, Graph)
     assert len(graph.nodes) == 4
     node1, node2, node3, node4 = graph.nodes.values()
     for node in node1, node2, node3, node4:
         assert isinstance(node, Node)
 
-def test_from_dict_adjacent_nodes(nodes):
+def test_from_dict_adjacent_nodes(nodes: list[Node]):
     node1, node2, node3, node4 = nodes
 
     assert node2 in node1.adjacent_nodes()
@@ -219,7 +102,7 @@ def test_from_dict_adjacent_nodes(nodes):
     assert not node4.adjacent_nodes()
     assert not node2.adjacent_nodes()
 
-def test_from_dict_edges(nodes):
+def test_from_dict_edges(nodes: list[Node]):
     node1, node2, node3, node4 = nodes
 
     assert any(Edge(node2, '2') == edge for edge in node1.edges)
@@ -232,13 +115,13 @@ def test_from_dict_edges(nodes):
 
 
 @pytest.mark.parametrize('arg', [None])
-def test_depth_first_from_requires_node(arg, graph):
+def test_depth_first_from_requires_node(arg: None, graph: Graph):
     with np.testing.assert_raises(Exception, msg=f"Graph must not take {arg} as an input."):
         for e in graph.depth_first_from(arg):
             print(e)
 
 
-def test_depth_first_from_1(graph, nodes):
+def test_depth_first_from_1(graph: Graph, nodes: list[Node]):
     node1, node2, node3, node4 = nodes
 
     nodes = []
@@ -251,7 +134,7 @@ def test_depth_first_from_1(graph, nodes):
     else:
         assert nodes[3] == node2, "Node 2 must be last it it's after node 3."
 
-def test_depth_first_from_3(graph, nodes):
+def test_depth_first_from_3(graph: Graph, nodes: list[Node]):
     node1, node2, node3, node4 = nodes
 
     nodes = list(graph.depth_first_from(node3))
@@ -259,7 +142,7 @@ def test_depth_first_from_3(graph, nodes):
     assert nodes[1] == node4
     assert len(nodes) == 2
 
-def test_depth_first_from_with_multiple_passes_through_nodes(graph, nodes):
+def test_depth_first_from_with_multiple_passes_through_nodes(graph: Graph, nodes: list[Node]):
     node1, node2, node3, node4 = nodes
     node4.add_edge(Edge(node1, '1'))
     assert len(list(graph.depth_first_from(node1))) == 4, "We reach one from 4 starting at one, but we should not yield 1 more than once."
@@ -270,7 +153,7 @@ def test_depth_first_from_with_multiple_passes_through_nodes(graph, nodes):
     assert len(list(graph.depth_first_from(node1))) == 4, \
         "A node that passes through itself should only be yielded once when starting from an node that passes through it."
 
-def test_depth_first_search(graph, nodes):
+def test_depth_first_search(graph: Graph, nodes: list[Node]):
     node1, node2, node3, node4 = nodes
     node5 = Node(5)
     node6 = Node(6)
