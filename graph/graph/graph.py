@@ -6,6 +6,7 @@ from typing import Any
 
 class Node:
     """A node (vertex) in a graph."""
+
     def __init__(self, name: Hashable):
         self.name = name
         self.edges = set()

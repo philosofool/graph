@@ -1,6 +1,6 @@
 from graph.graph import Edge, Node
 
-from tests.test_graph import nodes, graph
+from tests.test_graph import nodes, graph   # noqa F401
 
 def test_node_attributes():
     node = Node('a')
@@ -65,7 +65,7 @@ def test_adjacent_nodes():
     assert node.adjacent_nodes() == {Node(1), node}
 
 
-def test_self_adjacent_node(nodes: list[Node]):
+def test_self_adjacent_node(nodes: list[Node]):  # noqa F811  Fixture not recognized by Flake8
     node1 = nodes[0]
     assert node1 not in node1.adjacent_nodes()
     node1.add_edge(Edge(node1, 'self'))

@@ -38,6 +38,6 @@ def test_edge_equality_similar_edge():
 def test_edge_properties_immutable():
     edge = Edge(Node(1), '1')
     with np.testing.assert_raises(AttributeError):
-        edge.label = '2'
+        edge.label = '2'  # pyright: ignore [reportAttributeAccessIssue]
     with np.testing.assert_raises(AttributeError):
-        edge.node = Node(1)
+        edge.node = Node(1)   # pyright: ignore [reportAttributeAccessIssue]
