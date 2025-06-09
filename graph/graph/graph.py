@@ -5,22 +5,32 @@ from graphlib import CycleError
 from typing import Any
 
 
+class InvalidCache(Exception):
+    ...
+
 class Node:
     """A node (vertex) in a graph."""
 
     def __init__(self, name: Hashable):
         self.name = name
         self.edges = set()
+        self._adjacent_nodes_cache = set()
 
     def add_edge(self, edge: Edge):
         self.edges.add(edge)
+        if self._adjacent_nodes_cache == InvalidCache:
+            self._adjacent_nodes_cache = self.adjacent_nodes()
+        self._adjacent_nodes_cache.add(edge.node)
 
     def remove_edge(self, edge: Edge):
+        self._adjacent_nodes_cache = InvalidCache
         self.edges.remove(edge)
 
     def adjacent_nodes(self) -> set[Node]:
         """List nodes reachable, 1 step away from, this node."""
-        return {edge.node for edge in self.edges}
+        if self._adjacent_nodes_cache is InvalidCache:
+            self._adjacent_nodes_cache = {edge.node for edge in self.edges}
+        return self._adjacent_nodes_cache
 
     def edges_to_node(self, node: Node) -> set[Edge]:
         """Get a set of edges in node which connect to this one directly."""

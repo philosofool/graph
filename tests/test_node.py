@@ -1,4 +1,4 @@
-from graph.graph import Edge, Node
+from graph.graph import Edge, Node, InvalidCache
 
 from tests.test_graph import nodes, graph   # noqa F401
 
@@ -79,3 +79,33 @@ def test_edges_to_node():
     node1.add_edge(first_edge)
     node1.add_edge(second_edge)
     assert node1.edges_to_node(node2) == {first_edge, second_edge}
+
+def test_remove_and_add():
+    node1 = Node(1)
+    node2 = Node(2)
+    edge = Edge(node2, '1')
+    assert node1.adjacent_nodes() == set(), "Nodes should have an empty set of adjacent nodes when initialized."
+    assert node1._adjacent_nodes_cache != InvalidCache, "The cache should start in a valid state."
+    node1.add_edge(edge)
+    assert node1._adjacent_nodes_cache == {node2}, "Adding an edge should include the node in its adjacent node cache."
+    node1.remove_edge(edge)
+    assert node1._adjacent_nodes_cache == InvalidCache, "Removing the node should put the cache in an invalid a state."
+    node1.add_edge(edge)
+    assert node1.adjacent_nodes() == {node2}, "Adding an edge should add the node to the set of adjacent nodes when the cahce is InvalidCache."
+    assert node2 in node1._adjacent_nodes_cache, "Calling adjacent_nodes should update the cache when the cache is InvalidCache"
+
+    node1.remove_edge(edge)
+    assert node1.adjacent_nodes() == node1._adjacent_nodes_cache, "Removing the node and calling adjacent_nodes should update the cache."
+
+    edge2 = Edge(node1, 'new')
+    node1.add_edge(edge)
+    node1.add_edge(edge2)
+    node1.remove_edge(edge)
+    assert node1.adjacent_nodes() == {node1}
+
+def test_adjacent_cache_not_exposed(nodes):
+    node1 = nodes[0]
+    some_nodes = node1.adjacent_nodes()
+    node2 = nodes[1]
+    some_nodes.remove(node2)
+    assert node2 in node1.adjacent_nodes()
