@@ -130,6 +130,8 @@ def test_depth_first_from_requires_node(arg: None, graph: Graph):
 
 def test_depth_first_from_1(graph: Graph, nodes: list[Node]):
     node1, node2, node3, node4 = nodes
+    node5 = Node(5)
+    node2.add_edge(Edge(Node(5), '5'))
 
     nodes = []
     for node in graph.depth_first_from(node1):
@@ -140,6 +142,9 @@ def test_depth_first_from_1(graph: Graph, nodes: list[Node]):
         assert nodes[1] == node2, "Node 2 must be second if it's before node 3."
     else:
         assert nodes[3] == node2, "Node 2 must be last it it's after node 3."
+    assert nodes.index(node2) < nodes.index(node5)
+
+
 
 def test_depth_first_from_3(graph: Graph, nodes: list[Node]):
     node1, node2, node3, node4 = nodes
