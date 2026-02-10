@@ -207,3 +207,14 @@ def test_from_arrays():
     adj_nodes = node.adjacent_nodes()
     assert graph.get_node(1) in adj_nodes
     assert graph.get_node(2) in adj_nodes
+
+def test_from_array__undirected():
+    nodes = np.array([[4], [2]])
+    edges = np.array([
+        [0, 1],
+    ])
+    graph = Graph.from_arrays(nodes=nodes, edges=edges, directed=False)
+    node1 = graph.get_node(0)
+    node2 = graph.get_node(1)
+    assert node2 in node1.adjacent_nodes()
+    assert node1 in node2.adjacent_nodes()

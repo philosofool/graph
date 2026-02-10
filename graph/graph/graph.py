@@ -161,13 +161,15 @@ class Graph:
         return graph
 
     @classmethod
-    def from_arrays(cls, nodes: Sequence, edges: Sequence):
+    def from_arrays(cls, nodes: Sequence, edges: Sequence, directed=True):
         graph = cls()
         for i in range(len(nodes)):
             node = Node(i)
             graph.add_node(node)
         for (from_node, to_node) in edges:
             graph.add_edge(graph.get_node(from_node), graph.get_node(to_node), None)
+            if not directed:
+                graph.add_edge(graph.get_node(to_node), graph.get_node(from_node), None)
         return graph
 
     def __contains__(self, node: Node):
