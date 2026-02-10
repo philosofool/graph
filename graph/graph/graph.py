@@ -77,6 +77,11 @@ class Graph:
             if edge_node not in self:
                 self.add_node(edge_node)
 
+    def add_edge(self, from_node: Node, to_node: Node, label: Any):
+        edge = Edge(to_node, label)
+        from_node.add_edge(edge)
+        self.add_node(from_node)
+
     def get_node(self, node_name: Any) -> Node:
         """Return the node with node name.
 
@@ -153,6 +158,16 @@ class Graph:
                 node.add_edge(edge)
             graph.add_node(node)
 
+        return graph
+
+    @classmethod
+    def from_arrays(cls, nodes: Sequence, edges: Sequence):
+        graph = cls()
+        for i in range(len(nodes)):
+            node = Node(i)
+            graph.add_node(node)
+        for (from_node, to_node) in edges:
+            graph.add_edge(graph.get_node(from_node), graph.get_node(to_node), None)
         return graph
 
     def __contains__(self, node: Node):

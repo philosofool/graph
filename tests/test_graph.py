@@ -26,6 +26,15 @@ def test_add_node():
     with np.testing.assert_raises(ValueError, msg='Adding a node with the same name that is not equivalent should be prohibited.'):
         graph.add_node(similar_node)
 
+def test_add_edge():
+    graph = Graph()
+    node = Node(1)
+    node2 = Node(2)
+    graph.add_edge(node, node2, None)
+    assert node in graph
+    assert node2 in graph
+
+
 def test_graph_add_edge_to_graphed_node():
     graph = Graph()
     node1 = Node(1)
@@ -183,3 +192,18 @@ def test_depth_first_search(graph: Graph, nodes: list[Node]):
     graph.add_node(node5)
 
     result = list(graph.depth_first_search())
+
+
+def test_from_arrays():
+    nodes = np.array([[4], [2], [3]])
+    edges = np.array([
+        [0, 1],
+        [0, 2],
+        [2, 1]
+    ])
+    graph = Graph.from_arrays(nodes=nodes, edges=edges)
+    assert graph.get_node(0)
+    node = graph.get_node(0)
+    adj_nodes = node.adjacent_nodes()
+    assert graph.get_node(1) in adj_nodes
+    assert graph.get_node(2) in adj_nodes
